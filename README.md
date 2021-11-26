@@ -2,15 +2,19 @@
 
 ## Candidate's Notes
 
-Main suggestion:
+**Main suggestion:**
 - Refactor into Typescript.
 
-Changes:
+**Notes:**
 1. Updated middleware so it doesn't query the DB when it isnt needed and added basic validation
 2. Floating point math in Javascript is lacking. A good alternative is to use libraries such as Dinero.js, Currency.js, and Numeral.js
 3. On the `/admin/best-profession` I considered the `paymentDate` date as reference as it wasn't clear which timestamp to consider
 4. A few of the queries could use some trimming: we don't need to fetch the full information from the DB on `best-profession` for example.
-  
+
+**Future work**
+1. Add testing, one suggestion is using mocha + chai to test/assert. As most APIs rely on the database there would be few unit tests but a good number of integration/e2e tests.
+2. Extend the seed database with real data or even more random generated data.
+3. Add JSDocs and API Docs, we can use Swagger for the APIs and pure JSDoc for methods.
 
 ## Assignment
 
