@@ -11,7 +11,6 @@ const getProfile = async (req, res, next) => {
     const profile = await Profile.findOne({ where: { id: profileId } });
 
     if (!profile) return res.status(401).end();
-    console.log(profile)
     req.profile = profile;
     next();
   } catch (error) {

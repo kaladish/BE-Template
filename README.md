@@ -1,6 +1,18 @@
 # DEEL BACKEND TASK
 
+## Candidate's Notes
+
+Main suggestion:
+- Refactor into Typescript.
+
+Changes:
+1. Updated middleware so it doesn't query the DB when it isnt needed and added basic validation
+2. Floating point math in Javascript is lacking. A good alternative is to use libraries such as Dinero.js, Currency.js, and Numeral.js
+3. On the `/admin/best-profession` I considered the `paymentDate` date as reference as it wasn't clear which timestamp to consider
+4. A few of the queries could use some trimming: we don't need to fetch the full information from the DB on `best-profession` for example.
   
+
+## Assignment
 
 💫 Welcome! 🎉
 

@@ -5,6 +5,8 @@ const {
 const { Job, Profile, sequelize } = require("../model");
 const currency = require("currency.js");
 
+const MAX_DEPOSIT_SHARE = 0.25;
+
 const getTotalPerdingPayments = async (profileId) => {
   return await Job.sum("price", {
     where: {
@@ -15,14 +17,18 @@ const getTotalPerdingPayments = async (profileId) => {
   });
 };
 
-const depositFunds = async (profileId, amount, userId) => {
-  const MAX_DEPOSIT_SHARE = 0.25;
-  const totalPendingPayments = await getTotalPerdingPayments(profileId);
+const hasEnoughFunds = (totalPendingPayments, depositAmount) => {
   const maxDeposit =
     currency(totalPendingPayments).multiply(MAX_DEPOSIT_SHARE).value;
-  if (amount > maxDeposit)
+  return depositAmount > maxDeposit
+}
+
+const depositFunds = async (profileId, amount, userId) => {
+  const totalPendingPayments = await getTotalPerdingPayments(profileId);
+  
+  if (!hasEnoughFunds(totalPendingPayments,amount))
     throw new DeelControllerError(
-      `Deposit rejected. Max deposit value for this client is ${maxDeposit}`
+      `Deposit rejected. Amount exceeds allowed limit.`
     );
 
   let response = {};
@@ -30,12 +36,13 @@ const depositFunds = async (profileId, amount, userId) => {
     .transaction(async () => {
       const profile = await Profile.findOne({ where: { id: userId } });
       if (!profile) throw new DeelControllerError("User not found");
+      
       profile.balance = currency(amount).add(currency(profile.balance));
       await profile.save();
       response = {
         message: "Deposit successful: Balance updated",
         target_user_id: userId,
-      };
+      };  
     })
     .catch((e) => {
       if (!(e instanceof DeelControllerError))
