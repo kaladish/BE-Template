@@ -2,7 +2,7 @@ const Sequelize = require('sequelize');
 
 const sequelize = new Sequelize({
   dialect: 'sqlite',
-  storage: './database.sqlite3'
+  storage: './database.sqlite3',
 });
 
 class Profile extends Sequelize.Model {}
@@ -50,6 +50,21 @@ Contract.init(
   }
 );
 
+Contract.addScope("isProfileRelated", (profileId) => {
+  return {
+    where: {
+      [Sequelize.Op.or]: [
+        {
+          ContractorId: profileId,
+        },
+        {
+          ClientId: profileId,
+        }
+      ]
+    },
+  }
+})
+
 class Job extends Sequelize.Model {}
 Job.init(
   {
@@ -74,6 +89,37 @@ Job.init(
     modelName: 'Job'
   }
 );
+
+Job.addScope("isProfileRelated", (profileId) => {
+  return {
+    where: {
+      [Sequelize.Op.or]: [
+        {
+          '$Contract.ClientId$': profileId,
+        },
+        {
+          '$Contract.ContractorId$': profileId,
+        }
+      ]
+    },
+    include: ['Contract']
+  }
+})
+
+Job.addScope('isContractActive', {
+  where: {
+    '$Contract.status$': {
+      [Sequelize.Op.ne]: 'terminated'
+    }
+  },
+  include: ['Contract']
+});
+
+Job.addScope('isUnpaid', {
+  where: {
+    paid: null
+  },
+});
 
 Profile.hasMany(Contract, {as :'Contractor',foreignKey:'ContractorId'})
 Contract.belongsTo(Profile, {as: 'Contractor'})
